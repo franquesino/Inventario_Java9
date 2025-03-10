@@ -2,40 +2,44 @@ package com.conexion.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Properties;
+import java.io.InputStream;
 
 public class ConexionDB {
-    private static final String URL = "jdbc:mysql://localhost:3307/tienda";
-    private static final String USER = "root";
-    private static final String PASSWORD = "pepe2302";
+    private static String URL;
+    private static String USER;
+    private static String PASSWORD;
 
-    public static Connection conectar() {
-        try {
-            Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("Conexión exitosa a la base de datos.");
-            return conn;
-        } catch (SQLException e) {
-            System.out.println("Error al conectar a la base de datos: " + e.getMessage());
-            return null;
+    static {
+        cargarConfiguracion();
+    }
+
+    private static void cargarConfiguracion() {
+        try (InputStream input = ConexionDB.class.getClassLoader().getResourceAsStream("config.properties")) {
+            Properties prop = new Properties();
+            prop.load(input);
+            
+            URL = prop.getProperty("db.url");
+            USER = prop.getProperty("db.user");
+            PASSWORD = prop.getProperty("db.password");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new RuntimeException("Error cargando configuración de la BD");
         }
+    }
+
+    public static Connection conectar() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
     public static void cerrarConexion(Connection conn) {
         try {
-            if (conn != null) {
+            if (conn != null && !conn.isClosed()) {
                 conn.close();
-                System.out.println("Conexión cerrada correctamente.");
             }
         } catch (SQLException e) {
-            System.out.println("Error al cerrar la conexión: " + e.getMessage());
+            System.err.println("Error al cerrar conexión: " + e.getMessage());
         }
     }
 }
-
-
-    
-
