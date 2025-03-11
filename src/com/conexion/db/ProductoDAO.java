@@ -6,23 +6,23 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ProductoDAO {
-    public void agregarProducto(Producto producto) {
-        String sql = "INSERT INTO InventarioProductos VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection conn = ConexionDB.conectar();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setString(1, producto.getNombre());
-            pstmt.setString(2, producto.getMarca());
-            pstmt.setString(3, producto.getModelo());
-            pstmt.setDouble(4, producto.getPrecio());
-            pstmt.setInt(5, producto.getCantidad());
-            pstmt.setString(6, producto.getCategoria());
-            
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Error al agregar producto: " + e.getMessage());
-        }
-    }
+	public void agregarProducto(Producto producto) {
+	    String sql = "INSERT INTO InventarioProductos (Nombre, Marca, Modelo, Precio, Cantidad, Categoria) VALUES (?, ?, ?, ?, ?, ?)";
+	    try (Connection conn = ConexionDB.conectar();
+	         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+	        
+	        pstmt.setString(1, producto.getNombre());
+	        pstmt.setString(2, producto.getMarca());
+	        pstmt.setString(3, producto.getModelo());
+	        pstmt.setDouble(4, producto.getPrecio());
+	        pstmt.setInt(5, producto.getCantidad());
+	        pstmt.setString(6, producto.getCategoria());
+	        
+	        pstmt.executeUpdate();
+	    } catch (SQLException e) {
+	        throw new RuntimeException("Error al agregar producto: " + e.getMessage());
+	    }
+	}
 
     public void eliminarProducto(String nombre) {
         String sql = "DELETE FROM InventarioProductos WHERE Nombre = ?";
