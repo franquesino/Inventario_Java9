@@ -11,6 +11,7 @@ public class InventarioGUI extends JFrame {
     private JTextField txtBuscar;
     private DefaultTableModel modeloTabla;
     private JTable tablaResultados;
+    private JComboBox<String> comboBusqueda;
 
     public InventarioGUI() {
         setTitle("Gestión de Inventario");
@@ -18,12 +19,18 @@ public class InventarioGUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(5, 5));
 
-        // Panel de búsqueda
+        // Panel de búsqueda mejorado
         JPanel panelBusqueda = new JPanel(new BorderLayout(5, 5));
+        
+        // Combo box para criterios de búsqueda
+        comboBusqueda = new JComboBox<>(new String[]{"Nombre", "Marca", "Categoría"});
+        panelBusqueda.add(comboBusqueda, BorderLayout.WEST);
+        
         txtBuscar = new JTextField();
+        panelBusqueda.add(txtBuscar, BorderLayout.CENTER);
+        
         JButton btnBuscar = new JButton("Buscar");
         btnBuscar.addActionListener(e -> buscarProducto());
-        panelBusqueda.add(txtBuscar, BorderLayout.CENTER);
         panelBusqueda.add(btnBuscar, BorderLayout.EAST);
 
         // Tabla de resultados
@@ -97,7 +104,11 @@ public class InventarioGUI extends JFrame {
 
     private void buscarProducto() {
         try {
-            List<Producto> resultados = productoDAO.buscarProductos("Nombre", txtBuscar.getText());
+            String criterio = mapearCriterioBusqueda((String) comboBusqueda.getSelectedItem());
+            String valor = txtBuscar.getText();
+            
+            List<Producto> resultados = productoDAO.buscarProductos(criterio, valor);
+            
             modeloTabla.setRowCount(0);
             for (Producto p : resultados) {
                 modeloTabla.addRow(new Object[]{
@@ -110,8 +121,16 @@ public class InventarioGUI extends JFrame {
                 });
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error en búsqueda: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error en búsqueda: " + e.getMessage(), 
+                                        "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private String mapearCriterioBusqueda(String criterioVisible) {
+        return switch (criterioVisible) {
+            case "Categoría" -> "Categoria";
+            default -> criterioVisible;
+        };
     }
 
     private void cargarDatosSeleccionados() {
@@ -119,7 +138,6 @@ public class InventarioGUI extends JFrame {
         if(fila >= 0) {
             FormularioProductoDialog dialog = new FormularioProductoDialog(this);
             
-            // Usar los getters
             dialog.getTxtNombre().setText(tablaResultados.getValueAt(fila, 0).toString());
             dialog.getTxtMarca().setText(tablaResultados.getValueAt(fila, 1).toString());
             dialog.getTxtModelo().setText(tablaResultados.getValueAt(fila, 2).toString());
